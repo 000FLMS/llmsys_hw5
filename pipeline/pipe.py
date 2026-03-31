@@ -26,7 +26,15 @@ def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[
     This function should yield schedules for each clock cycle.
     '''
     # BEGIN_HW5_2_1
-    raise NotImplementedError("Schedule Generation Not Implemented Yet")
+    total_cycles = num_partitions + num_batches - 1
+    for k in range(total_cycles):
+        start_i = min(k, num_batches - 1)
+        end_i = max(k - num_partitions, -1)
+        schedule = []
+        for i in range(start_i, end_i, -1):
+            schedule.append((i, k - i))
+        yield schedule
+        
     # END_HW5_2_1
 
 class Pipe(nn.Module):
@@ -53,7 +61,17 @@ class Pipe(nn.Module):
         Please note that you should put the result on the last device. Putting the result on the same device as input x will lead to pipeline parallel training failing.
         '''
         # BEGIN_HW5_2_2
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
+        micro_size = self.split_size
+        part_num = len(self.devices)
+        batches = list(torch.split(x, micro_size, dim=0))
+        micro_batch_num = len(batches)
+
+        for schedule in _clock_cycles(micro_batch_num, part_num):
+            self.compute(batches, schedule)
+
+        output = torch.cat(batches, dim=0).to(self.devices[-1])
+
+        return output
         # END_HW5_2_2
 
     def compute(self, batches, schedule: List[Tuple[int, int]]) -> None:
@@ -69,6 +87,22 @@ class Pipe(nn.Module):
         devices = self.devices
 
         # BEGIN_HW5_2_2
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
+        # Send
+        for batch_id, part_id in schedule:
+            microbatch = batches[batch_id].to(devices[part_id])
+            part_model = partitions[part_id]
+            def wrap_fun(part_model=part_model, microbatch=microbatch):
+                return part_model(microbatch)
+            self.in_queues[part_id].put(Task(wrap_fun))
+        
+        # Recieve
+        for batch_id, part_id in schedule:
+            flag, res = self.out_queues[part_id].get()
+            if not flag:
+                exc_type, exc_value, exc_tb = res
+                raise RuntimeError("Recieve compute output error") from exc_value
+            else:
+                _, batch = res
+                batches[batch_id] = batch
         # END_HW5_2_2
 

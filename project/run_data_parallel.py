@@ -32,7 +32,10 @@ def average_gradients(model):
     3. Average the gradients over the world_size (total number of devices)
     '''
     # BEGIN_HW5_1_2
-    raise NotImplementedError("Data Parallel Not Implemented Yet")
+    for param in model.parameters():
+        dist.all_reduce(param.grad, op=dist.ReduceOp.SUM)
+        param.grad = param.grad / dist.get_world_size()
+    
     # END_HW5_1_2
 
 def setup(rank, world_size, backend):
@@ -42,7 +45,9 @@ def setup(rank, world_size, backend):
     2. Use `torch.distributed` to init the process group
     '''
     # BEGIN_HW5_1_2
-    raise NotImplementedError("Data Parallel Not Implemented Yet")
+    os.environ["MASTER_ADDR"] = "localhost"
+    os.environ["MASTER_PORT"] = "11868"
+    dist.init_process_group(backend=backend, world_size=world_size, rank=rank)
     # END_HW5_1_2
 
 
@@ -197,8 +202,25 @@ if __name__ == '__main__':
     2. You should start the processes to work and terminate resources properly
     '''
     # BEGIN_HW5_1_3
-    world_size = None  # TODO: Define the number of GPUs
-    backend = None  # TODO: Define your backend for communication, we suggest using 'nccl'
+    world_size = args.world_size  #  Define the number of GPUs
+    backend = 'nccl'  #  Define your backend for communication, we suggest using 'nccl'
+    dataset_name = args.dataset
+    model_max_length = args.model_max_length
+    n_epochs = args.n_epochs
+    batch_size = args.batch_size
+    lr = args.learning_rate
+    benchmark_only = args.benchmark_only
+    max_batches = args.max_batches
+    pytest = args.pytest
 
-    raise NotImplementedError("Data Parallel Not Implemented Yet")
+    for i in range(world_size):
+        proc = Process(target=run_dp, args=(i, world_size, backend, 
+                                            dataset_name, model_max_length, n_epochs, batch_size,
+                                            lr,benchmark_only, max_batches, pytest))
+        proc.start()
+        processes.append(proc)
+
+    for proc in processes:
+        proc.join()
+
     # END_HW5_1_3

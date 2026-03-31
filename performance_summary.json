@@ -1,0 +1,81 @@
+{
+  "config": {
+    "epochs": 3,
+    "warmup_epochs_dropped": 1,
+    "pipeline_batch_size": 96,
+    "pipeline_n_chunk": 2
+  },
+  "data_parallel": {
+    "single_gpu": {
+      "time_mean": 49.029099106788635,
+      "time_std": 0.06029951572418213,
+      "tok_mean": 82646.97959240817,
+      "tok_std": 103.16692294017412
+    },
+    "two_gpu": {
+      "time_mean": 25.39139360189438,
+      "time_std": 0.006602823734283447,
+      "tok_mean": 161949.9171722134,
+      "tok_std": 7.250757839676226
+    },
+    "speedup_time_reduction_x": 1.9309337595054537,
+    "speedup_throughput_x": 1.959538242908636
+  },
+  "pipeline_parallel": {
+    "model_parallel": {
+      "time_mean": 46.763882994651794,
+      "time_std": 0.0020607709884643555,
+      "tok_mean": 13685.775437340035,
+      "tok_std": 0.6030989552155006
+    },
+    "pipeline_parallel": {
+      "time_mean": 45.279077649116516,
+      "time_std": 0.02502453327178955,
+      "tok_mean": 14134.5678559568,
+      "tok_std": 7.811797014391232
+    },
+    "speedup_time_reduction_x": 1.0327923054670318,
+    "speedup_throughput_x": 1.0327926189255077
+  }
+}
+
+{
+  "config": {
+    "epochs": 3,
+    "warmup_epochs_dropped": 1,
+    "pipeline_batch_size": 96,
+    "pipeline_n_chunk": 2
+  },
+  "data_parallel": {
+    "single_gpu": {
+      "time_mean": 49.22092890739441,
+      "time_std": 0.05605196952819824,
+      "tok_mean": 82414.39801601041,
+      "tok_std": 82.21271478754352
+    },
+    "two_gpu": {
+      "time_mean": 25.425710797309875,
+      "time_std": 0.03267192840576172,
+      "tok_mean": 161682.49800568435,
+      "tok_std": 35.11633156937023
+    },
+    "speedup_time_reduction_x": 1.9358722869058256,
+    "speedup_throughput_x": 1.9618234422372987
+  },
+  "pipeline_parallel": {
+    "model_parallel": {
+      "time_mean": 46.7387079000473,
+      "time_std": 0.03162968158721924,
+      "tok_mean": 13693.153316712689,
+      "tok_std": 9.266625005098831
+    },
+    "pipeline_parallel": {
+      "time_mean": 45.27613377571106,
+      "time_std": 0.003513336181640625,
+      "tok_mean": 14135.482659013189,
+      "tok_std": 1.0968847940257547
+    },
+    "speedup_time_reduction_x": 1.032303423511856,
+    "speedup_throughput_x": 1.0323029569646773
+  }
+}
